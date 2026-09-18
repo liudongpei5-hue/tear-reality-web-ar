@@ -16,12 +16,14 @@
     #enter{min-width:210px;border:1px solid #fff;border-radius:999px;padding:14px 24px;background:#f4f5f6;color:#08090b;font-weight:650;cursor:pointer}#enter:disabled{opacity:.55;cursor:wait}
     #progress{height:2px;width:min(280px,75vw);margin:22px auto 0;background:#343941;overflow:hidden;opacity:0}.bar{height:100%;width:0;background:#fff;transition:width .15s linear}
     #hint{position:fixed;left:50%;bottom:max(18px,env(safe-area-inset-bottom));z-index:3;transform:translateX(-50%);padding:9px 14px;border:1px solid rgba(255,255,255,.24);border-radius:999px;background:rgba(8,9,11,.55);backdrop-filter:blur(10px);white-space:nowrap;font-size:14px;opacity:0;transition:opacity .3s;pointer-events:none}
+    #reset{position:fixed;top:max(16px,env(safe-area-inset-top));right:max(16px,env(safe-area-inset-right));z-index:4;display:none;min-width:76px;min-height:44px;padding:8px 16px;border:1px solid rgba(255,255,255,.55);border-radius:999px;background:rgba(8,9,11,.7);color:#fff;backdrop-filter:blur(10px);cursor:pointer;touch-action:manipulation}
     #error{position:fixed;inset:auto 16px max(16px,env(safe-area-inset-bottom));z-index:8;padding:12px 14px;border-radius:10px;background:#801f2a;display:none}
   </style>
 </head>
 <body>
   <main id="stage" aria-label="撕开现实互动体验">
     <canvas id="unity-canvas" tabindex="-1"></canvas>
+    <button id="reset" type="button" aria-label="复原画面">复原</button>
     <div id="hint">按住并拖动，撕开现实 · R 键复原</div>
   </main>
   <section id="gate"><div class="panel">
@@ -31,14 +33,15 @@
   </div></section>
   <div id="error" role="alert"></div><noscript>需要启用 JavaScript 才能体验。</noscript>
   <script>
-    const canvas=document.querySelector('#unity-canvas'),gate=document.querySelector('#gate'),button=document.querySelector('#enter'),progress=document.querySelector('#progress'),bar=document.querySelector('.bar'),hint=document.querySelector('#hint'),errorBox=document.querySelector('#error');
+    const canvas=document.querySelector('#unity-canvas'),gate=document.querySelector('#gate'),button=document.querySelector('#enter'),reset=document.querySelector('#reset'),progress=document.querySelector('#progress'),bar=document.querySelector('.bar'),hint=document.querySelector('#hint'),errorBox=document.querySelector('#error');
+    reset.addEventListener('click',()=>location.reload());
     const build='Build';
     const config={arguments:[],dataUrl:build+'/WebGL.data',frameworkUrl:build+'/WebGL.framework.js',codeUrl:build+'/WebGL.wasm',streamingAssetsUrl:'StreamingAssets',companyName:'Studio Prototype',productName:'Tear Reality',productVersion:'1.0',devicePixelRatio:/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)?1:Math.min(devicePixelRatio,1.5),showBanner(message,type){if(type==='error'){errorBox.textContent=message;errorBox.style.display='block'}}};
     function fail(message){button.disabled=false;button.textContent='重新尝试';errorBox.textContent=message;errorBox.style.display='block'}
     button.addEventListener('click',()=>{
       button.disabled=true;button.textContent='正在进入…';progress.style.opacity=1;errorBox.style.display='none';
       const script=document.createElement('script');script.src=build+'/WebGL.loader.js';
-      script.onload=()=>createUnityInstance(canvas,config,p=>bar.style.width=(p*100)+'%').then(()=>{gate.style.display='none';hint.style.opacity=1;setTimeout(()=>hint.style.opacity=.25,5000);canvas.focus()}).catch(()=>fail('载入失败，请刷新页面后重试。'));
+      script.onload=()=>createUnityInstance(canvas,config,p=>bar.style.width=(p*100)+'%').then(()=>{gate.style.display='none';reset.style.display='block';hint.style.opacity=1;setTimeout(()=>hint.style.opacity=.25,5000);canvas.focus()}).catch(()=>fail('载入失败，请刷新页面后重试。'));
       script.onerror=()=>fail('网络载入失败，请检查连接后重试。');document.body.appendChild(script);
     },{once:true});
   </script>
